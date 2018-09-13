@@ -1,23 +1,66 @@
 
 var detectNetwork = function(cardNumber) {
-  var network = '';
-  var length = cardNumber.length;
-  var first = function(depth) {
-    return cardNumber.slice(0,depth);
+
+  var prefixMatch = function(testNetwork) {
+    var prefixes = testNetwork.prefixes;
+    var prefixTo = function(depth) {
+      return cardNumber.slice(0,depth);
+    };
+
+    for (var i = 0; i < prefixes.length; i++) {
+      var depth;
+      if (Array.isArray(prefixes[i])) {
+        depth = prefixes[i][0].length;
+        if (prefixes[i][0] <= prefixTo(depth) && prefixTo(depth) <= prefixes[i][1]) {
+          return true;
+        }
+      } else {
+        depth = prefixes[i].length;
+        if (prefixes[i] === prefixTo(depth)) {
+          return true;
+        }
+      }
+    }
+    return false;
   };
 
-  if ((first(2) === '38' || first(2) === '39') && length === 14) {
-    network = 'Diner\'s Club';
-  } else if ((first(2) === '34' || first(2) === '37') && length === 15) {
-    network = 'American Express';
-  } else if (first(1) === '4' && (length === 13 || length === 16 || length === 19)) {
-    network = 'Visa';
-  } else if (first(2) >= '51' && first(2) <= '55' && length === 16) {
-    network = 'MasterCard';
-  } else if ((first(4) === '6011' || (first(3) >= '644' && first(3) <= '649') || first(2) === '65') && (length === 19 || length === 16)) {
-    network = 'Discover';
-  } else if ((first(4) === '5018' || first(4) === '5020' || first(4) === '5038' || first(4) === '6304') && length >= 12 && length <= 19) {
-    network = 'Maestro';
+  var lengthMatch = function(testNetwork) {
+    var lengths = testNetwork.lengths;
+    for (var i = 0; i < lengths.length; i++) {
+      var depth;
+      if (Array.isArray(lengths[i])) {
+        if (lengths[i][0] <= cardNumber.length && cardNumber.length <= lengths[i][1]) {
+          return true;
+        }
+      } else if (cardNumber.length === lengths[i]) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  var Network = function(networkName, prefixes, lengths) {
+    this.networkName = networkName;
+    this.prefixes = prefixes;
+    this.lengths = lengths;
+  };
+
+  var networks = [
+    new Network('Diner\'s Club', ['38', '39'], [14]),
+    new Network('American Express', ['34', '37'], [15]),
+    new Network('Visa', ['4'], [13, 16, 19]),
+    new Network('MasterCard', [['51', '55']], [16]),
+    new Network('Discover', ['6011', ['644', '649'], '65'], [16, 19]),
+    new Network('Maestro', ['5018', '5020', '5038', '6304'], [[12, 19]]),
+    new Network('China UnionPay', [['622126', '622925'], ['624', '626'], ['6282', '6288']], [[16, 19]]),
+    new Network('Switch', ['4903', '4905', '4911', '4936', '564182', '633110', '6333', '6759'], [16, 18, 19] )
+  ];
+
+  for (var i = 0; i < networks.length; i++) {
+    if (prefixMatch(networks[i]) && lengthMatch(networks[i])) {
+      result = networks[i].networkName;
+    }
   }
-  return network;
+
+  return result;
 };

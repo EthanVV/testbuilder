@@ -1,3 +1,10 @@
+var variableTest = function(prefix, cardLength, expected) {
+  var referenceCardNumber = '6011345678901231234';
+  var testCardNumber = prefix + referenceCardNumber.slice(prefix.length, cardLength);
+  it('has a prefix of ' + prefix + ' and a length of ' + cardLength, function() {
+      detectNetwork(testCardNumber).should.equal(expected);
+  });
+};
 
 describe('Diner\'s Club', function() {
   var should = chai.should();
@@ -65,62 +72,62 @@ describe('MasterCard', function() {
 });
 
 describe('Discover', function() {
-  var should = chai.should();
   var referenceCardNumber = '6011345678901231234';
+  var expect = 'Discover';
 
-  function variableTest(prefix, cardLength) {
-    var testCardNumber = prefix + referenceCardNumber.slice(prefix.length, cardLength);
-    it('has a prefix of ' + prefix + ' and a length of ' + cardLength, function() {
-        detectNetwork(testCardNumber).should.equal('Discover');
-    });
-  }
-
-  variableTest('65', 16);
-  variableTest('65', 19);
-  variableTest('6011', 16);
-  variableTest('6011', 19);
+  variableTest('65', 16, expect);
+  variableTest('65', 19, expect);
+  variableTest('6011', 16, expect);
+  variableTest('6011', 19, expect);
   for (var i = 644; i <= 649; i++) {
     var prefix = i.toString();
-    variableTest(prefix, 16);
-    variableTest(prefix, 19);
+    variableTest(prefix, 16, expect);
+    variableTest(prefix, 19, expect);
   }
 });
 
 describe('Maestro', function() {
-  var should = chai.should();
-  var referenceCardNumber = '6011345678901231234';
+  var expect = 'Maestro';
 
-  function variableTest(prefix, cardLength) {
-    var testCardNumber = prefix + referenceCardNumber.slice(prefix.length, cardLength);
-    it('has a prefix of ' + prefix + ' and a length of ' + cardLength, function() {
-        detectNetwork(testCardNumber).should.equal('Maestro');
-    });
-  }
-  
   for (var i = 12; i <= 19; i++) {
-    variableTest('5018', i);
-    variableTest('5020', i);
-    variableTest('5038', i);
-    variableTest('6304', i);
+    variableTest('5018', i, expect);
+    variableTest('5020', i, expect);
+    variableTest('5038', i, expect);
+    variableTest('6304', i, expect);
+  }
+});
+
+describe('China UnionPay', function() {
+  var expect = 'China UnionPay';
+  function forLengths (length) {
+    var prefix = length.toString();
+    for (var j = 16; j <= 19; j++) {
+      variableTest(prefix, j, expect);
+    }
   }
 
-
-
-/*
-  it('has a prefix of 5018 and a lenght of 12', function() {
-    detectNetwork('501845678901').should.equal('Maestro');
-  });
-
-  it('has a prefix of 5020 and a lenght of 14', function() {
-    detectNetwork('50204567890123').should.equal('Maestro');
-  });
-
-  it('has a prefix of 5038 and a lenght of 17', function() {
-    detectNetwork('50384567890123123').should.equal('Maestro');
-  });
-
-  it('has a prefix of 6304 and a length of 19', function() {
-    detectNetwork('6304456789012312364').should.equal('Maestro');
-  });
-  */
+  for (var i = 622126; i <= 622925; i++) {
+    forLengths(i);
+  }
+  for (var i = 624; i <= 626; i++) {
+    forLengths(i);
+  }
+  for (var i = 6282; i <= 6288; i++) {
+    forLengths(i);
+  }
 });
+
+describe('Switch', function() {
+  var expect = 'Switch';
+  var prefixes = ['4903', '4905', '4911', '4936', '564182', '633110', '6333', '6759'];
+
+  for (var i = 0; i < prefixes.length; i++) {
+    variableTest(prefixes[i], 16, expect);
+    variableTest(prefixes[i], 18, expect);
+    variableTest(prefixes[i], 19, expect);
+  }
+});
+/*
+   new Network('China UnionPay', [['622126', '622925'], ['624', '626'], ['6282', '6288']], [[16, 19]]),
+    new Network('Switch', ['4903', '4905', '4911', '4936', '564182', '633110', '6333', '6759'], [16, 18, 19] )
+*/
